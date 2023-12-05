@@ -1,0 +1,11 @@
+# Node modules
+node_modules/
+
+# TS build cache files
+*.tsbuildinfo
+
+# IDE settings
+.vscode/
+
+# Build directory
+build/
