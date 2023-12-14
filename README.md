@@ -118,3 +118,8 @@ This will log the following to the console (with colors):
 [1970-01-01T00:00:000Z][ERROR][TypeError][FUNCTION_NAME] Wrong Type!
 [1970-01-01T00:00:000Z][OK][200] Transaction successful!
 ```
+
+## Change log
+### 1.1.0
+- Fixed a bug where the colors were not set properly.
+- Added option to customize colors.

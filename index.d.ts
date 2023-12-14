@@ -41,7 +41,7 @@ export declare class MyLogger {
     useNameInPrefix: boolean;
     useTimestampInPrefix: boolean;
     colors: LoggerColors;
-    constructor(options: LoggerConfig);
+    constructor(options?: LoggerConfig);
     private getBasePrefix;
     private getPrefixesString;
     info(message: string, ...prefixes: string[]): void;
@@ -52,6 +52,10 @@ export declare class MyLogger {
 }
 export default MyLogger;
 export interface LoggerConfig {
+    /**
+     * Partial object to override default colors.
+     */
+    colors?: Partial<LoggerColors>;
     /**
      * Boolean to enable/disable logger. Defaults to true.
      */
@@ -84,5 +88,6 @@ export interface LoggerColors {
     ok: CONSOLE_COLORS;
     warn: CONSOLE_COLORS;
     timestamp: CONSOLE_COLORS;
+    name: CONSOLE_COLORS;
 }
 //# sourceMappingURL=index.d.ts.map
