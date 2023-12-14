@@ -52,126 +52,108 @@ export class MyLogger {
 
   public colors: LoggerColors;
 
-  constructor(options: LoggerConfig) {
+  constructor(options: LoggerConfig = {}) {
     this.enable = options.enable ?? true;
     this.name = options.name ?? "MyLogger";
     this.useColors = options.useColors ?? true;
-    this.useHighIntensityColors = options.useHighIntensityColors ?? false;
+    this.useHighIntensityColors = options.useHighIntensityColors ?? true;
     this.useNameInPrefix = options.useNameInPrefix ?? true;
     this.useTimestampInPrefix = options.useTimestampInPrefix ?? true;
 
-    this.colors = this.useHighIntensityColors ?
-      {
-        debug: CONSOLE_COLORS.FG_HI_CYAN,
-        error: CONSOLE_COLORS.FG_HI_RED,
-        info: CONSOLE_COLORS.FG_HI_BLUE,
-        ok: CONSOLE_COLORS.FG_HI_GREEN,
-        warn: CONSOLE_COLORS.FG_HI_YELLOW,
-        timestamp: CONSOLE_COLORS.FG_HI_WHITE,
-      } :
-      {
-        debug: CONSOLE_COLORS.FG_CYAN,
-        error: CONSOLE_COLORS.FG_RED,
-        info: CONSOLE_COLORS.FG_BLUE,
-        ok: CONSOLE_COLORS.FG_GREEN,
-        warn: CONSOLE_COLORS.FG_YELLOW,
-        timestamp: CONSOLE_COLORS.FG_WHITE,
-      };
+    const defaultHiColors: LoggerColors = {
+      debug: CONSOLE_COLORS.FG_HI_CYAN,
+      error: CONSOLE_COLORS.FG_HI_RED,
+      info: CONSOLE_COLORS.FG_HI_BLUE,
+      ok: CONSOLE_COLORS.FG_HI_GREEN,
+      warn: CONSOLE_COLORS.FG_HI_YELLOW,
+      timestamp: CONSOLE_COLORS.FG_HI_MAGENTA,
+      name: CONSOLE_COLORS.FG_HI_WHITE
+    };
+
+    const defaultColors: LoggerColors = {
+      debug: CONSOLE_COLORS.FG_CYAN,
+      error: CONSOLE_COLORS.FG_RED,
+      info: CONSOLE_COLORS.FG_BLUE,
+      ok: CONSOLE_COLORS.FG_GREEN,
+      warn: CONSOLE_COLORS.FG_YELLOW,
+      timestamp: CONSOLE_COLORS.FG_MAGENTA,
+      name: CONSOLE_COLORS.FG_WHITE
+    };
+
+    const userDefinedColors = options.colors ?? {};
+
+    this.colors = this.useHighIntensityColors ? defaultHiColors : defaultColors;
+    this.colors = {
+      ...this.colors,
+      ...userDefinedColors
+    };
+
   }
 
   private getBasePrefix() {
     let prefix = "";
     if (this.useTimestampInPrefix) {
-      prefix += `[${new Date().toISOString()}]`;
-      if (this.useColors) {
-        prefix = `${this.colors.timestamp}${prefix}${CONSOLE_COLORS.RESET}`;
-      }
+      const timestampString = `[${new Date().toISOString()}]`;
+      if (this.useColors)
+        prefix += `${this.colors.timestamp}${timestampString}${CONSOLE_COLORS.RESET}`;
+      else
+        prefix += timestampString;
     }
     if (this.useNameInPrefix) {
-      prefix += `[${this.name}]`;
-      if (this.useColors) {
-        prefix = `${this.colors.info}${prefix}${CONSOLE_COLORS.RESET}`;
-      }
+      const nameString = `[${this.name}]`;
+      if (this.useColors)
+        prefix += `${this.colors.name}${nameString}${CONSOLE_COLORS.RESET}`;
+      else
+        prefix += nameString;
     }
 
     return prefix;
   }
 
-  private getPrefixesString(prefixes: string[]) {
+  private getPrefixesString(method: keyof Omit<LoggerColors, 'name' | 'timestamp'>, prefixes: string[]) {
     let prefix = "";
+    prefixes.unshift(method.toUpperCase());
     for (const p of prefixes) {
       prefix += `[${p}]`;
     }
+    if (this.useColors)
+      prefix = `${this.colors[method]}${prefix}${CONSOLE_COLORS.RESET}`;
+
     return prefix;
   }
 
   info(message: string, ...prefixes: string[]) {
     if (this.enable) {
-      const basePrefix = this.getBasePrefix();
-      let prefix = "[INFO]"
-      if (prefixes.length > 0) {
-        prefix += this.getPrefixesString(prefixes);
-        if (this.useColors) {
-          prefix = `${this.colors.info}${prefix}${CONSOLE_COLORS.RESET}`;
-        }
-      }
-      console.log(`${basePrefix}${prefix} ${message}`)
+      const p = this.getBasePrefix() + this.getPrefixesString('info', prefixes);
+      console.log(`${p} ${message}`);
     }
   }
 
   debug(message: string, ...prefixes: string[]) {
     if (this.enable) {
-      const basePrefix = this.getBasePrefix();
-      let prefix = "[DEBUG]"
-      if (prefixes.length > 0) {
-        prefix += this.getPrefixesString(prefixes);
-        if (this.useColors) {
-          prefix = `${this.colors.debug}${prefix}${CONSOLE_COLORS.RESET}`;
-        }
-      }
-      console.log(`${basePrefix}${prefix} ${message}`)
+      const p = this.getBasePrefix() + this.getPrefixesString('debug', prefixes);
+      console.log(`${p} ${message}`);
     }
   }
 
   warn(message: string, ...prefixes: string[]) {
     if (this.enable) {
-      const basePrefix = this.getBasePrefix();
-      let prefix = "[WARN]"
-      if (prefixes.length > 0) {
-        prefix += this.getPrefixesString(prefixes);
-        if (this.useColors) {
-          prefix = `${this.colors.warn}${prefix}${CONSOLE_COLORS.RESET}`;
-        }
-      }
-      console.log(`${basePrefix}${prefix} ${message}`)
+      const p = this.getBasePrefix() + this.getPrefixesString('warn', prefixes);
+      console.log(`${p} ${message}`);
     }
   }
 
   error(message: string, ...prefixes: string[]) {
     if (this.enable) {
-      const basePrefix = this.getBasePrefix();
-      let prefix = "[ERROR]"
-      if (prefixes.length > 0) {
-        prefix += this.getPrefixesString(prefixes);
-        if (this.useColors) {
-          prefix = `${this.colors.error}${prefix}${CONSOLE_COLORS.RESET}`;
-        }
-      }
-      console.log(`${basePrefix}${prefix} ${message}`)
+      const p = this.getBasePrefix() + this.getPrefixesString('error', prefixes);
+      console.log(`${p} ${message}`);
     }
   }
 
   ok(message: string, ...prefixes: string[]) {
     if (this.enable) {
-      const basePrefix = this.getBasePrefix();
-      let prefix = "[OK]"
-      if (prefixes.length > 0) {
-        prefix += this.getPrefixesString(prefixes);
-        if (this.useColors) {
-          prefix = `${this.colors.ok}${prefix}${CONSOLE_COLORS.RESET}`;
-        }
-      }
-      console.log(`${basePrefix}${prefix} ${message}`)
+      const p = this.getBasePrefix() + this.getPrefixesString('ok', prefixes);
+      console.log(`${p} ${message}`);
     }
   }
 }
@@ -179,6 +161,10 @@ export class MyLogger {
 export default MyLogger
 
 export interface LoggerConfig {
+  /**
+   * Partial object to override default colors.
+   */
+  colors?: Partial<LoggerColors>
   /**
    * Boolean to enable/disable logger. Defaults to true.
    */
@@ -206,10 +192,11 @@ export interface LoggerConfig {
 }
 
 export interface LoggerColors {
-  debug: CONSOLE_COLORS;
-  error: CONSOLE_COLORS;
-  info: CONSOLE_COLORS;
-  ok: CONSOLE_COLORS;
-  warn: CONSOLE_COLORS;
-  timestamp: CONSOLE_COLORS;
+  debug       : CONSOLE_COLORS;
+  error       : CONSOLE_COLORS;
+  info        : CONSOLE_COLORS;
+  ok          : CONSOLE_COLORS;
+  warn        : CONSOLE_COLORS;
+  timestamp   : CONSOLE_COLORS;
+  name        : CONSOLE_COLORS;
 }
